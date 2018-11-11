@@ -57,6 +57,7 @@ int main()
           // j[1] is the data JSON object
           
           string sensor_measurment = j[1]["sensor_measurement"];
+          cout<<sensor_measurment<<endl;
           
           MeasurementPackage meas_package;
           istringstream iss(sensor_measurment);
@@ -171,7 +172,7 @@ int main()
     std::cout << "Disconnected" << std::endl;
   });
 
-  int port = 3000;
+  int port = 4567;
   if (h.listen(port))
   {
     std::cout << "Listening to port " << port << std::endl;

@@ -5,6 +5,10 @@ using Eigen::VectorXd;
 
 // Please note that the Eigen library does not initialize 
 // VectorXd or MatrixXd objects with zeros upon creation.
+void NormalizeAngle(double& phi)
+{
+  phi = atan2(sin(phi), cos(phi));
+}
 
 KalmanFilter::KalmanFilter() {}
 
@@ -35,7 +39,7 @@ void KalmanFilter::Update(const VectorXd &z) {
   MatrixXd PHt = P_ * Ht;
   MatrixXd K = PHt * Si;
 
-  //new estimate
+  
   x_ = x_ + (K * y);
   long x_size = x_.size();
   MatrixXd I = MatrixXd::Identity(x_size, x_size);
@@ -46,6 +50,7 @@ void KalmanFilter::Update(const VectorXd &z) {
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
   float rho = sqrt(x_(0)*x_(0) + x_(1)*x_(1));
   float phi = atan2(x_(1), x_(0));
+  
   float rho_dot;
   if (fabs(rho) < 0.0001) {
     rho_dot = 0;
@@ -54,14 +59,14 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   }
   VectorXd z_pred(3);
   z_pred << rho, phi, rho_dot;
-  VectorXd y = z - z_pred;
+  VectorXd y = z - z_pred;//y-h(x)
+  NormalizeAngle(y(1));//new estimate
   MatrixXd Ht = H_.transpose();
   MatrixXd S = H_ * P_ * Ht + R_;
   MatrixXd Si = S.inverse();
   MatrixXd PHt = P_ * Ht;
   MatrixXd K = PHt * Si;
 
-  //new estimate
   x_ = x_ + (K * y);
   long x_size = x_.size();
   MatrixXd I = MatrixXd::Identity(x_size, x_size);
